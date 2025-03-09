@@ -31,6 +31,12 @@ public class AsyncCommandRunner implements CommandRunner {
             try {
                 Process process = processBuilder.start();
                 updateProcessList(process, true);
+
+                List<String> output = new ArrayList<>();
+                readStream(process.getInputStream(), output::add);
+
+                int exitCode = process.waitFor();
+                listener.accept(new CommandResultV2(command, exitCode, output));
             } catch (Exception e) {
                 log.error("runCommandAsync :: Exception occurred", e);
                 listener.accept(new CommandResultV2(command, -1, List.of("Error: " + e.getMessage())));
@@ -69,5 +75,11 @@ public class AsyncCommandRunner implements CommandRunner {
             return list;
         });
         executor.shutdown();
+        try {
+            executor.awaitTermination(5, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            log.error("stopGracefully :: Exception occurred", e);
+            Thread.currentThread().interrupt();
+        }
     }
 }

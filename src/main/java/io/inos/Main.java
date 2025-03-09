@@ -21,6 +21,5 @@ public class Main {
 
         log.info("server started at {}", server.uri());
         log.info("UI is running on {}/ui path", server.uri());
-        log.info("css file is at {}/static/assets/index-D8b4DHJx.css", server.uri());
     }
 }

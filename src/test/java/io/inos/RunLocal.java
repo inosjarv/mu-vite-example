@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.time.Duration;
-import java.util.concurrent.CompletableFuture;
 
 public class RunLocal {
     private static final Logger log = LoggerFactory.getLogger(RunLocal.class);
@@ -19,12 +18,21 @@ public class RunLocal {
 
     public static void startNpmDevServer() {
         runner = new AsyncCommandRunner();
-        runner.runCommandAsync("cd ./web && npm run dev", res -> log.info("res => {}", res));
+        runner.runCommandAsync("cd ./web && npm run dev", res -> {
+            if (res.exitCode() == 0) {
+                log.info("startNpmDevServer :: Dev server started successfully {}", res);
+            } else {
+                log.error("startNpmDevServer :: Something went wrong {}", res);
+            }
+        }).exceptionally(e -> {
+            log.error("startNpmDevServer :: Exception occurred", e);
+            return null;
+        });
     }
 
     public static void main(String[] args) {
         System.setProperty("jdk.internal.httpclient.disableHostnameVerification", "true");
-        CompletableFuture.runAsync(RunLocal::startNpmDevServer);
+        startNpmDevServer();
         MuServer server = MuServerBuilder.httpServer()
                 .withHttpPort(5454)
                 .addHandler(

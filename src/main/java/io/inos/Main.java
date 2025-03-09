@@ -1,4 +1,4 @@
-package io.jarv;
+package io.inos;
 
 import io.muserver.ContextHandlerBuilder;
 import io.muserver.MuServer;

@@ -7,17 +7,16 @@ import io.muserver.handlers.ResourceHandlerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
-
 public class Main {
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
         MuServer server = MuServerBuilder.httpServer()
                 .addHandler(ContextHandlerBuilder.context("ui")
-                        .addHandler(ResourceHandlerBuilder.fileOrClasspath("src/main/resources/static", "/static"))
+                        .addHandler(ResourceHandlerBuilder.classpathHandler("/static"))
                         .build())
-                .addResponseCompleteListener(listener -> log.info("url => {}, relative path => {}, status code => {}, duration => {}", listener.request().uri(), listener.request().relativePath(), listener.response().status(), listener.duration()))
+                .addResponseCompleteListener(listener -> log.info("url => {}, relative path => {}, status code => {}, duration => {}",
+                        listener.request().uri(), listener.request().relativePath(), listener.response().status(), listener.duration()))
                 .start();
 
         log.info("server started at {}", server.uri());

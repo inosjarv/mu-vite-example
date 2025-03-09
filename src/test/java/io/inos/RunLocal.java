@@ -4,9 +4,6 @@ import io.muserver.MuServer;
 import io.muserver.MuServerBuilder;
 import io.muserver.murp.Murp;
 import io.muserver.murp.ReverseProxyBuilder;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,15 +31,14 @@ public class RunLocal {
                         ReverseProxyBuilder.reverseProxy()
                                 .withUriMapper(request -> {
                                     String pathAndQuery = Murp.pathAndQuery(request.uri());
-                                    log.info("pathAndQuery => {}", pathAndQuery);
+                                    log.debug("pathAndQuery => {}", pathAndQuery);
                                     return URI.create("http://localhost:5173").resolve(pathAndQuery);
                                 })
                                 .sendLegacyForwardedHeaders(true)
                                 .proxyHostHeader(true)
                                 .withTotalTimeout(Duration.ofMinutes(1).toMillis())
-                                .addProxyCompleteListener((clientRequest, clientResponse, targetUri, durationMillis) -> {
-                                    log.info("Proxied {} to {} and returned {} in {} ms", clientRequest, targetUri, clientResponse.status(), durationMillis);
-                                })
+                                .addProxyCompleteListener((clientRequest, clientResponse, targetUri, durationMillis) ->
+                                        log.debug("Proxied {} to {} and returned {} in {} ms", clientRequest, targetUri, clientResponse.status(), durationMillis))
                                 .withHttpClient(
                                         ReverseProxyBuilder.createHttpClientBuilder(true)
                                                 .connectTimeout(Duration.ofMinutes(1))
@@ -51,6 +47,7 @@ public class RunLocal {
                                                 .build()
                                 ).build()
                 )
+                .addResponseCompleteListener(listener -> log.info("url => {}, response code => {}, duration => {}", listener.request().relativePath(), listener.response().status(), listener.duration()))
                 .addShutdownHook(true)
                 .start();
 
@@ -58,14 +55,6 @@ public class RunLocal {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             runner.stopGracefully();
             server.stop();
-        }, "process-stopper-thread"));
-    }
-
-    @Path("ui")
-    static class ReverseProxy {
-        @GET
-        public Response uiHandler() {
-            return Response.temporaryRedirect(URI.create("http://localhost:5173/ui")).build();
-        }
+        }, "shutdown-hook-thread"));
     }
 }

@@ -5,3 +5,4 @@
 - [X] Run `npm run dev` command using java app (add shutdown hook as well)
 - [X] Reverse proxy to dev UI in `RunLocal.java` file
 - [X] Graceful shutdown  
+- [ ] React Router integration

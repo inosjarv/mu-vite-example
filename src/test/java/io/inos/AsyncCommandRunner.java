@@ -71,6 +71,13 @@ public class AsyncCommandRunner implements CommandRunner {
             list.forEach(process -> {
                 log.info("stopGraceFully :: Stopping Process => {}", process.info().commandLine());
                 process.destroy();
+                try {
+                    boolean terminated = process.waitFor(5, java.util.concurrent.TimeUnit.SECONDS);
+                    log.info("stopGraceFully :: {} ", terminated ? "Process stopped" : "Process is still running");
+                } catch (InterruptedException e) {
+                    log.error("stopGracefully :: Exception occurred while waiting for process to stop", e);
+                    Thread.currentThread().interrupt();
+                }
             });
             return list;
         });

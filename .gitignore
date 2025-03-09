@@ -38,7 +38,8 @@ build/
 ### Mac OS ###
 .DS_Store
 
-./web/dist/
-./src/main/resource/static/
-./web/node_modules
+web/dist/
+src/main/resource/static/
+web/node_modules
 logs/
+src/maiu

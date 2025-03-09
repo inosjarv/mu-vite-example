@@ -42,4 +42,4 @@ web/dist/
 src/main/resources/static/
 web/node_modules
 logs/
-src/maiu
+depenency-reduced-pom.xml
